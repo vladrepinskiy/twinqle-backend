@@ -1,84 +1,31 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance } from "fastify";
 import { db } from "../config/database";
 import { type CreateOrderInput } from "../schemas/orders";
-import { OrdersRepository } from "../repositories/orders.repository";
-import { ShipmentService } from "../services/shipment.service";
-import { LateLogisticsClient } from "../clients/latelogistics.client";
+import { OrdersController } from "../controllers/orders.controller";
 
 interface OrderParams {
   id: string;
 }
 
 export const orderRoutes = async (fastify: FastifyInstance) => {
-  const webhookBaseUrl = process.env.WEBHOOK_BASE_URL || "";
-
-  const ordersRepository = new OrdersRepository(db);
-  const lateLogisticsClient = new LateLogisticsClient(
-    process.env.LATE_LOGISTICS_API_URL || "",
-    process.env.LATE_LOGISTICS_API_KEY || ""
-  );
-  const shipmentService = new ShipmentService(
-    ordersRepository,
-    lateLogisticsClient,
-    webhookBaseUrl,
-    fastify.log
-  );
+  const ordersController = new OrdersController(db, fastify.log, {
+    webhookBaseUrl: process.env.WEBHOOK_BASE_URL || "",
+    lateLogisticsApiUrl: process.env.LATE_LOGISTICS_API_URL || "",
+    lateLogisticsApiKey: process.env.LATE_LOGISTICS_API_KEY || "",
+  });
 
   // Create order
-  fastify.post<{ Body: CreateOrderInput }>(
-    "/",
-    async (
-      request: FastifyRequest<{ Body: CreateOrderInput }>,
-      reply: FastifyReply
-    ) => {
-      const order = await ordersRepository.create(request.body);
-      reply.code(201).send(order);
-
-      // Fire-and-forget after response sent
-      setImmediate(() => {
-        shipmentService.initiateShipmentCreation(order.id);
-      });
-    }
-  );
+  fastify.post<{ Body: CreateOrderInput }>("/", ordersController.createOrder);
 
   // Get order by ID
-  fastify.get<{ Params: OrderParams }>(
-    "/:id",
-    async (
-      request: FastifyRequest<{ Params: OrderParams }>,
-      reply: FastifyReply
-    ) => {
-      const { id } = request.params;
-      const order = await ordersRepository.findById(id);
-
-      if (!order) {
-        return reply.code(404).send({ error: "Order not found" });
-      }
-
-      return order;
-    }
-  );
+  fastify.get<{ Params: OrderParams }>("/:id", ordersController.getOrderById);
 
   // List all orders
-  fastify.get("/", async () => {
-    const orders = await ordersRepository.findAll();
-    return orders;
-  });
+  fastify.get("/", ordersController.listOrders);
 
   // Mark order as read (reset has_updates to false)
   fastify.patch<{ Params: OrderParams }>(
     "/:id/mark-read",
-    async (
-      request: FastifyRequest<{ Params: OrderParams }>,
-      reply: FastifyReply
-    ) => {
-      const { id } = request.params;
-      try {
-        const order = await ordersRepository.markAsRead(id);
-        return order;
-      } catch (error) {
-        return reply.code(404).send({ error: "Order not found" });
-      }
-    }
+    ordersController.markOrderAsRead
   );
 };

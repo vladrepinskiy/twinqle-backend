@@ -13,8 +13,8 @@ Fastify + TypeScript API with PostgreSQL. Database managed via Docker Compose. U
 **Key Files:**
 
 - `src/index.ts` - Server entry point
-- `src/routes/orders.ts` - Order management routes
-- `src/routes/webhooks.ts` - Webhook endpoints for carrier callbacks
+- `src/routes/` - Route definitions (thin layer, delegates to controllers)
+- `src/controllers/` - Request handlers with business logic coordination
 - `src/repositories/` - Repository pattern for data access (one per table)
 - `src/services/` - Business logic services (e.g., shipment.service.ts)
 - `src/clients/` - External API clients (implement abstract.client.ts interface)
