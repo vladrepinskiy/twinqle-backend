@@ -15,11 +15,6 @@ export const orderStatusSchema = z.enum([
 
 export const createOrderSchema = z.object({
   merchant_reference: z.string().min(1),
-  carrier: z.string().min(1),
-  barcode: z.string().min(1),
-  status: orderStatusSchema,
-  carrier_shipment_id: z.string().optional(),
-  label_pdf_base64: z.string().optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

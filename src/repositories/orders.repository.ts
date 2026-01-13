@@ -13,6 +13,15 @@ export class OrdersRepository implements Repository<
 > {
   constructor(private db: Kysely<DB>) {}
 
+  private generateBarcode(): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let barcode = "";
+    for (let i = 0; i < 16; i++) {
+      barcode += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return barcode;
+  }
+
   async create(input: CreateOrderInput): Promise<OrderEntity> {
     const body = createOrderSchema.parse(input);
 
@@ -20,11 +29,11 @@ export class OrdersRepository implements Repository<
       .insertInto("orders")
       .values({
         merchant_reference: body.merchant_reference,
-        carrier: body.carrier,
-        barcode: body.barcode,
-        status: body.status,
-        carrier_shipment_id: body.carrier_shipment_id,
-        label_pdf_base64: body.label_pdf_base64,
+        carrier: "late_logistics",
+        barcode: this.generateBarcode(),
+        status: "creating_shipment",
+        carrier_shipment_id: null,
+        label_pdf_base64: null,
       } as any)
       .returningAll()
       .executeTakeFirstOrThrow();
