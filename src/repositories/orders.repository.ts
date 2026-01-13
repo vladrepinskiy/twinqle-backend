@@ -238,7 +238,10 @@ export class OrdersRepository implements Repository<
     return order;
   }
 
-  async storeSignature(id: string, signatureBase64: string): Promise<OrderEntity> {
+  async storeSignature(
+    id: string,
+    signatureBase64: string
+  ): Promise<OrderEntity> {
     const order = await this.db
       .updateTable("orders")
       .set({
