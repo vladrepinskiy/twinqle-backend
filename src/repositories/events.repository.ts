@@ -12,9 +12,6 @@ export interface CreateEventInput {
 export class EventsRepository {
   constructor(private db: Kysely<DB>) {}
 
-  /**
-   * Create an event record. Returns true if inserted, false if duplicate (idempotency).
-   */
   async create(input: CreateEventInput): Promise<boolean> {
     try {
       await this.db
@@ -40,9 +37,6 @@ export class EventsRepository {
     }
   }
 
-  /**
-   * Find all events for an order (for audit trail).
-   */
   async findByOrderId(orderId: string) {
     return this.db
       .selectFrom("events")
