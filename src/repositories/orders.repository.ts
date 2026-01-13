@@ -3,6 +3,7 @@ import { sql } from "kysely";
 import type { DB, Orders } from "../types/database";
 import {
   createOrderSchema,
+  canTransitionTo,
   type CreateOrderInput,
   type ShipmentStatus,
 } from "../schemas/orders";
@@ -163,7 +164,24 @@ export class OrdersRepository implements Repository<
     id: string,
     status: ShipmentStatus,
     reason?: string
-  ): Promise<OrderEntity> {
+  ): Promise<OrderEntity | null> {
+    // Fetch current order to validate transition
+    const currentOrder = await this.db
+      .selectFrom("orders")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    if (!currentOrder) {
+      return null;
+    }
+
+    // Check if transition is valid
+    if (!canTransitionTo(currentOrder.shipment_status, status)) {
+      // Invalid transition - return current order unchanged
+      return currentOrder;
+    }
+
     const updateData: Record<string, unknown> = {
       shipment_status: status,
       has_updates: true,
@@ -210,6 +228,21 @@ export class OrdersRepository implements Repository<
         label_pdf_base64: labelBase64,
         label_fetched_at: sql`now()`,
         shipment_status: "confirmed",
+        has_updates: true,
+        updated_at: sql`now()`,
+      })
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return order;
+  }
+
+  async storeSignature(id: string, signatureBase64: string): Promise<OrderEntity> {
+    const order = await this.db
+      .updateTable("orders")
+      .set({
+        signature_png_base64: signatureBase64,
         has_updates: true,
         updated_at: sql`now()`,
       })
