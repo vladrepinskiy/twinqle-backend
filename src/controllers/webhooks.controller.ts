@@ -88,16 +88,17 @@ export class WebhooksController {
       return reply.code(200).send({ status: "duplicate" });
     }
 
-    // If we don't have carrier_shipment_id yet (timeout case), update it now
-    if (!order.carrier_shipment_id) {
-      await this.ordersRepository.updateCarrierData(order.id, {
-        carrier_shipment_id: payload.shipment_id,
-        tracking_code: order.tracking_code || "", // May not have it if creation timed out
-      });
-    }
-
     // Handle status-specific logic
     if (payload.status === "created") {
+      // Update carrier data FIRST if missing (timeout recovery case)
+      // This must happen before triggering label fetch to avoid race condition
+      if (!order.carrier_shipment_id) {
+        await this.ordersRepository.updateCarrierData(order.id, {
+          carrier_shipment_id: payload.shipment_id,
+          tracking_code: order.tracking_code || payload.barcode,
+        });
+      }
+
       // Fetch label to confirm the shipment
       // Fire and forget - don't block webhook response
       setImmediate(() => {
@@ -105,6 +106,14 @@ export class WebhooksController {
       });
       // Don't update status here - fetchAndStoreLabel will handle it
       return reply.code(200).send({ status: "accepted" });
+    }
+
+    // For non-created events, update carrier data if missing
+    if (!order.carrier_shipment_id) {
+      await this.ordersRepository.updateCarrierData(order.id, {
+        carrier_shipment_id: payload.shipment_id,
+        tracking_code: order.tracking_code || payload.barcode,
+      });
     }
 
     if (payload.status === "failed") {
@@ -118,6 +127,14 @@ export class WebhooksController {
 
     // For other statuses (confirmed, in_transit, out_for_delivery, delivered)
     await this.ordersRepository.updateShipmentStatus(order.id, payload.status);
+
+    // Store signature for delivered events
+    if (payload.status === "delivered" && payload.data?.signature_png_base64) {
+      await this.ordersRepository.storeSignature(
+        order.id,
+        payload.data.signature_png_base64
+      );
+    }
 
     return reply.code(200).send({ status: "accepted" });
   };

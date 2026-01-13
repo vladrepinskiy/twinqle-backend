@@ -12,6 +12,29 @@ export const shipmentStatusSchema = z.enum([
   "failed",
 ]);
 
+// Status progression order for transition validation
+const STATUS_ORDER: Record<string, number> = {
+  pending_creation: 0,
+  creation_in_flight: 1,
+  created: 2,
+  confirming: 3,
+  confirmed: 4,
+  in_transit: 5,
+  out_for_delivery: 6,
+  delivered: 7,
+  failed: 7, // Terminal state, same level as delivered
+};
+
+export const canTransitionTo = (
+  current: string,
+  next: string
+): boolean => {
+  // Always allow transition to failed
+  if (next === "failed") return true;
+  // Allow forward transitions only
+  return STATUS_ORDER[next] > STATUS_ORDER[current];
+};
+
 export const recipientSchema = z.object({
   name: z.string().min(1),
   address1: z.string().min(1),
