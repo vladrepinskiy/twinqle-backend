@@ -57,6 +57,7 @@ export interface Orders {
   recipient_postal_code: string;
   shipment_status: string;
   shipment_status_reason: string | null;
+  signature_png_base64: string | null;
   tracking_code: string | null;
   updated_at: Generated<Timestamp>;
 }

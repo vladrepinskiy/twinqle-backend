@@ -32,9 +32,10 @@ export const fetchWithOptions = async (
       // For non-timeout errors, store and potentially retry
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // Retry on non-timeout errors if attempts remain
+      // Retry on non-timeout errors if attempts remain (with exponential backoff)
       if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        const delay = retryDelayMs * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
