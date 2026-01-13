@@ -25,13 +25,9 @@ const STATUS_ORDER: Record<string, number> = {
   failed: 7, // Terminal state, same level as delivered
 };
 
-export const canTransitionTo = (
-  current: string,
-  next: string
-): boolean => {
+export const canTransitionTo = (current: string, next: string): boolean => {
   // Always allow transition to failed
   if (next === "failed") return true;
-  // Allow forward transitions only
   return STATUS_ORDER[next] > STATUS_ORDER[current];
 };
 

@@ -164,7 +164,7 @@ export class OrdersRepository implements Repository<
     id: string,
     status: ShipmentStatus,
     reason?: string
-  ): Promise<OrderEntity | null> {
+  ): Promise<{ order: OrderEntity | null; transitionApplied: boolean }> {
     // Fetch current order to validate transition
     const currentOrder = await this.db
       .selectFrom("orders")
@@ -173,13 +173,13 @@ export class OrdersRepository implements Repository<
       .executeTakeFirst();
 
     if (!currentOrder) {
-      return null;
+      return { order: null, transitionApplied: false };
     }
 
     // Check if transition is valid
     if (!canTransitionTo(currentOrder.shipment_status, status)) {
       // Invalid transition - return current order unchanged
-      return currentOrder;
+      return { order: currentOrder, transitionApplied: false };
     }
 
     const updateData: Record<string, unknown> = {
@@ -199,7 +199,7 @@ export class OrdersRepository implements Repository<
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return order;
+    return { order, transitionApplied: true };
   }
 
   async updateCarrierData(
@@ -257,6 +257,22 @@ export class OrdersRepository implements Repository<
     const order = await this.db
       .updateTable("orders")
       .set({ has_updates: false, updated_at: sql`now()` })
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return order;
+  }
+
+  async resetForRetry(id: string): Promise<OrderEntity> {
+    const order = await this.db
+      .updateTable("orders")
+      .set({
+        shipment_status: "pending_creation",
+        shipment_status_reason: null,
+        has_updates: true,
+        updated_at: sql`now()`,
+      })
       .where("id", "=", id)
       .returningAll()
       .executeTakeFirstOrThrow();

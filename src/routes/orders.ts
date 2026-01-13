@@ -28,4 +28,10 @@ export const orderRoutes = async (fastify: FastifyInstance) => {
     "/:id/mark-read",
     ordersController.markOrderAsRead
   );
+
+  // Retry shipment creation for stuck/failed orders
+  fastify.post<{ Params: OrderParams }>(
+    "/:id/retry",
+    ordersController.retryShipment
+  );
 };
