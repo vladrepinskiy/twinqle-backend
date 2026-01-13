@@ -86,4 +86,15 @@ export class OrdersRepository implements Repository<
 
     return order;
   }
+
+  async markAsRead(id: string): Promise<OrderEntity> {
+    const order = await this.db
+      .updateTable("orders")
+      .set({ has_updates: false, updated_at: sql`now()` })
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    return order;
+  }
 }

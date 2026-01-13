@@ -45,4 +45,21 @@ export const orderRoutes = async (fastify: FastifyInstance) => {
     const orders = await ordersRepository.findAll();
     return orders;
   });
+
+  // Mark order as read (reset has_updates to false)
+  fastify.patch<{ Params: OrderParams }>(
+    "/:id/mark-read",
+    async (
+      request: FastifyRequest<{ Params: OrderParams }>,
+      reply: FastifyReply
+    ) => {
+      const { id } = request.params;
+      try {
+        const order = await ordersRepository.markAsRead(id);
+        return order;
+      } catch (error) {
+        return reply.code(404).send({ error: "Order not found" });
+      }
+    }
+  );
 };
