@@ -2,13 +2,27 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { db } from "../config/database";
 import { type CreateOrderInput } from "../schemas/orders";
 import { OrdersRepository } from "../repositories/orders.repository";
+import { ShipmentService } from "../services/shipment.service";
+import { LateLogisticsClient } from "../clients/latelogistics.client";
 
 interface OrderParams {
   id: string;
 }
 
 export const orderRoutes = async (fastify: FastifyInstance) => {
+  const webhookBaseUrl = process.env.WEBHOOK_BASE_URL || "";
+
   const ordersRepository = new OrdersRepository(db);
+  const lateLogisticsClient = new LateLogisticsClient(
+    process.env.LATE_LOGISTICS_API_URL || "",
+    process.env.LATE_LOGISTICS_API_KEY || ""
+  );
+  const shipmentService = new ShipmentService(
+    ordersRepository,
+    lateLogisticsClient,
+    webhookBaseUrl,
+    fastify.log
+  );
 
   // Create order
   fastify.post<{ Body: CreateOrderInput }>(
@@ -19,6 +33,11 @@ export const orderRoutes = async (fastify: FastifyInstance) => {
     ) => {
       const order = await ordersRepository.create(request.body);
       reply.code(201).send(order);
+
+      // Fire-and-forget after response sent
+      setImmediate(() => {
+        shipmentService.initiateShipmentCreation(order.id);
+      });
     }
   );
 
