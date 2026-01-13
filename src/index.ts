@@ -7,7 +7,7 @@ const envSchema = {
   type: "object",
   required: ["PORT", "DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"],
   properties: {
-    PORT: { type: "string", default: "3000" },
+    PORT: { type: "string", default: "5000" },
     NODE_ENV: { type: "string", default: "development" },
     DB_HOST: { type: "string", default: "localhost" },
     DB_PORT: { type: "string", default: "5432" },
@@ -64,7 +64,7 @@ const buildServer = async () => {
 const start = async () => {
   try {
     const fastify = await buildServer();
-    const port = parseInt(process.env.PORT || "3000", 10);
+    const port = parseInt(process.env.PORT || "5000", 10);
     const host = "0.0.0.0";
 
     await fastify.listen({ port, host });

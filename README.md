@@ -14,6 +14,9 @@ npm install
 # Run database migrations
 npm run db:migrate
 
+# Generate types from DB schema
+npm run db:generate-types
+
 # Seed database (optional)
 npm run db:seed
 
@@ -21,7 +24,7 @@ npm run db:seed
 npm run dev
 ```
 
-The API will be available at `http://localhost:3000`
+The API will be available at `http://localhost:5000` and PostgreSQL at `localhost:5432`
 
 ## Setup
 
