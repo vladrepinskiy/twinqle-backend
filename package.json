@@ -1,0 +1,35 @@
+{
+  "name": "twinqle-backend",
+  "version": "0.0.1",
+  "description": "Merchant-carrier translation and robustness layer API implemented with Node.js and Postgres",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seeds/runner.ts",
+    "db:generate-types": "kysely-codegen --dialect postgres --out-file src/types/database.ts",
+    "format": "prettier --write \"src/**/*.{ts,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,json}\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/env": "^4.2.0",
+    "fastify": "^4.26.0",
+    "kysely": "^0.27.2",
+    "pg": "^8.11.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/pg": "^8.10.9",
+    "kysely-codegen": "^0.11.0",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.7.4",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

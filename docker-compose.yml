@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: twinqle-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-twinqle}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-twinqle_password}
+      POSTGRES_DB: ${DB_NAME:-twinqle}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-twinqle} -d ${DB_NAME:-twinqle}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
