@@ -1,4 +1,8 @@
-export interface Repository<TEntity, TCreateInput, TUpdateInput = Partial<TCreateInput>> {
+export interface Repository<
+  TEntity,
+  TCreateInput,
+  TUpdateInput = Partial<TCreateInput>,
+> {
   create(data: TCreateInput): Promise<TEntity>;
   findById(id: string): Promise<TEntity | null>;
   findAll(): Promise<TEntity[]>;
