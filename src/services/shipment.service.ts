@@ -78,10 +78,7 @@ export class ShipmentService {
     }
   }
 
-  /**
-   * Fetches and stores the label from Late Logistics.
-   * Called when we receive a 'created' webhook event.
-   */
+  // Called when we receive a 'created' webhook event
   async fetchAndStoreLabel(orderId: string): Promise<void> {
     const order = await this.ordersRepository.findById(orderId);
     if (!order) {
@@ -112,7 +109,6 @@ export class ShipmentService {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       this.logger.error("Label fetch failed", { orderId, error: errorMessage });
-      // Don't change status - user can retry via /retry-label endpoint
     }
   }
 }
