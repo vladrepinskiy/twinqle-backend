@@ -14,9 +14,18 @@ Fastify + TypeScript API with PostgreSQL. Database managed via Docker Compose. U
 
 - `src/index.ts` - Server entry point
 - `src/routes/orders.ts` - Order management routes
+- `src/routes/webhooks.ts` - Webhook endpoints for carrier callbacks
 - `src/repositories/` - Repository pattern for data access (one per table)
+- `src/services/` - Business logic services (e.g., shipment.service.ts)
+- `src/clients/` - External API clients (implement abstract.client.ts interface)
 - `src/config/database.ts` - Kysely database instance
 - `src/db/migrations/` - Database migrations
 - `src/db/seeds/` - Database seeds
+
+**Local Development:**
+
+- Requires ngrok for webhook testing (Late Logistics callbacks)
+- Configure ngrok authtoken once for persistent URLs
+- Set `WEBHOOK_BASE_URL` in `.env` to your ngrok URL
 
 **Important:** After any significant change or refactor, check if this file needs updates. Keep it concise.

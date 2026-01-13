@@ -5,7 +5,17 @@ import { registerRoutes } from "./routes";
 
 const envSchema = {
   type: "object",
-  required: ["PORT", "DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"],
+  required: [
+    "PORT",
+    "DB_HOST",
+    "DB_PORT",
+    "DB_NAME",
+    "DB_USER",
+    "DB_PASSWORD",
+    "LATE_LOGISTICS_API_URL",
+    "LATE_LOGISTICS_API_KEY",
+    "WEBHOOK_BASE_URL",
+  ],
   properties: {
     PORT: { type: "string", default: "5001" },
     NODE_ENV: { type: "string", default: "development" },
@@ -14,6 +24,9 @@ const envSchema = {
     DB_NAME: { type: "string", default: "twinqle" },
     DB_USER: { type: "string", default: "twinqle" },
     DB_PASSWORD: { type: "string" },
+    LATE_LOGISTICS_API_URL: { type: "string" },
+    LATE_LOGISTICS_API_KEY: { type: "string" },
+    WEBHOOK_BASE_URL: { type: "string" },
   },
 };
 
