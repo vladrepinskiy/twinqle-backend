@@ -14,6 +14,7 @@ Fastify + TypeScript API with PostgreSQL. Database managed via Docker Compose. U
 
 - `src/index.ts` - Server entry point
 - `src/routes/orders.ts` - Order management routes
+- `src/repositories/` - Repository pattern for data access (one per table)
 - `src/config/database.ts` - Kysely database instance
 - `src/db/migrations/` - Database migrations
 - `src/db/seeds/` - Database seeds

@@ -36,13 +36,6 @@ Fastify + TypeScript API with PostgreSQL, using Kysely for type-safe database qu
 - Zod (schema validation)
 - Prettier (code formatting)
 
-**Available Scripts:**
+**Architecture:**
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run start` - Run production build
-- `npm run db:migrate` - Run database migrations
-- `npm run db:seed` - Seed database with sample data
-- `npm run db:generate-types` - Generate TypeScript types from database schema
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
+- Repository pattern for data access - each table has a repository in `src/repositories/` that encapsulates database queries and business logic
