@@ -24,7 +24,7 @@ npm run db:seed
 npm run dev
 ```
 
-The API will be available at `http://localhost:5000` and PostgreSQL at `localhost:5432`
+The API will be available at `http://localhost:5001` and PostgreSQL at `localhost:5432`
 
 ## Setup
 
