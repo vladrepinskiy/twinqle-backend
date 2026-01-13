@@ -24,13 +24,15 @@ export const fetchWithOptions = async (
     } catch (error) {
       clearTimeout(timeoutId);
 
+      // Always throw timeout errors immediately - never retry
       if (error instanceof Error && error.name === "AbortError") {
         throw new TimeoutError(`Request timed out after ${timeoutMs}ms`);
       }
 
+      // For non-timeout errors, store and potentially retry
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // Don't retry on the last attempt
+      // Retry on non-timeout errors if attempts remain
       if (attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       }
