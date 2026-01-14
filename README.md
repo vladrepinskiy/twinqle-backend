@@ -87,6 +87,8 @@ WEBHOOK_BASE_URL=https://your-ngrok-url.ngrok-free.app
 
 Fastify + TypeScript API with PostgreSQL, using Kysely for type-safe database queries and Zod for request validation.
 
+Intentionally avoided overengineering the MVP app with minimal Node.js framework and minimal Postgres setup (Prism or such feels already an overkill)
+
 **Dependencies:**
 
 - Fastify (web framework)
@@ -96,6 +98,12 @@ Fastify + TypeScript API with PostgreSQL, using Kysely for type-safe database qu
 - Zod (schema validation)
 - Prettier (code formatting)
 
-**Architecture:**
+**Some Key Robustness Decisions**
 
-- Repository pattern for data access - each table has a repository in `src/repositories/` that encapsulates database queries and business logic
+- Generate barcodes before calling the carrier, since these will always be present in consequetive webhook updates. Used as fallback lookup key when carrier_shipment_id is missing (timeout recovery)
+- `event_id` has a unique constraint in the events table. Duplicate webhooks are detected and ignored
+- `canTransitionTo()` only allows forward transitions, which prevents out-of-order webhooks from corrupting state
+- `SHIPMENT_CREATION_TIMEOUT_MS = 65000` (65s) to handle 50+ second cold starts
+- On shipment creation timeout we stay in `creation_in_flight` status, wait for webhook to reconcile. Outdated/stale orders in this status can be manually retried by users later (after 10 minutes)
+- `fetchWithOptions` utility function retries on server errors, we make several attempts with exponential backoff (1s, 2s delays)
+- On order creation API returns 201 immediately, shipment creation happens in background via setImmediate
