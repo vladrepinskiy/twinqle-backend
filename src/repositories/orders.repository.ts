@@ -7,15 +7,10 @@ import {
   type CreateOrderInput,
   type ShipmentStatus,
 } from "../schemas/orders";
-import type { Repository } from "./abstract.repository";
 
 type OrderEntity = Selectable<Orders>;
 
-export class OrdersRepository implements Repository<
-  OrderEntity,
-  CreateOrderInput,
-  Partial<CreateOrderInput>
-> {
+export class OrdersRepository {
   constructor(private db: Kysely<DB>) {}
 
   private generateBarcode(): string {
